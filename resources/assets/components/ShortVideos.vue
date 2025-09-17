@@ -1,6 +1,20 @@
 <template>
 	<div class="short-videos-container">
-		<div class="videos-wrapper" ref="videosWrapper">
+		<!-- Loading State -->
+		<div v-if="loading && videos.length === 0" class="loading-state">
+			<div class="spinner"></div>
+			<p>Loading videos...</p>
+		</div>
+		
+		<!-- Empty State -->
+		<div v-else-if="!loading && videos.length === 0" class="empty-state">
+			<i class="fas fa-video fa-3x"></i>
+			<h3>No Videos Available</h3>
+			<p>There are no short videos to display at the moment.</p>
+		</div>
+		
+		<!-- Videos -->
+		<div v-else class="videos-wrapper" ref="videosWrapper">
 			<div 
 				v-for="(video, index) in videos" 
 				:key="`video-${video.id}`"
@@ -10,6 +24,7 @@
 			>
 				<!-- Video Element -->
 				<video 
+					v-if="video.media_attachments[0].type === 'video'"
 					:ref="`video-${index}`"
 					:src="video.media_attachments[0].url"
 					:poster="video.media_attachments[0].preview_url"
@@ -20,6 +35,15 @@
 					@ended="nextVideo"
 					@loadedmetadata="onVideoLoaded(index)"
 				></video>
+				
+				<!-- Image Element -->
+				<img 
+					v-else-if="video.media_attachments[0].type === 'image'"
+					:src="video.media_attachments[0].url"
+					:alt="video.content || 'Image'"
+					class="image-player"
+					@load="onVideoLoaded(index)"
+				>
 
 				<!-- Video Overlay -->
 				<div class="video-overlay">
@@ -175,7 +199,13 @@ export default {
 		this.videos = this.initialVideos;
 		this.setupTouchEvents();
 		this.setupKeyboardEvents();
-		this.loadMoreVideos();
+		
+		// If no initial videos provided, load from API
+		if (this.initialVideos.length === 0) {
+			this.loadVideosFromAPI();
+		} else {
+			this.loadMoreVideos();
+		}
 		
 		// Auto-play first video
 		if (this.videos.length > 0) {
@@ -189,6 +219,34 @@ export default {
 		this.removeKeyboardEvents();
 	},
 	methods: {
+		async loadVideosFromAPI() {
+			this.loading = true;
+			try {
+				// Load media from public timeline API
+				const response = await axios.get('/api/v1/timelines/public?limit=20');
+				const videos = response.data.filter(post => 
+					post.media_attachments && 
+					post.media_attachments.length > 0 && 
+					(post.media_attachments[0].type === 'video' || post.media_attachments[0].type === 'image')
+				);
+				
+				this.videos = videos;
+				
+				// Auto-play first video if available
+				if (this.videos.length > 0) {
+					this.$nextTick(() => {
+						this.playVideo(0);
+					});
+				}
+			} catch (error) {
+				console.error('Error loading videos:', error);
+				// Show empty state or error message
+				this.videos = [];
+			} finally {
+				this.loading = false;
+			}
+		},
+		
 		setupTouchEvents() {
 			const wrapper = this.$refs.videosWrapper;
 			if (wrapper) {
@@ -290,14 +348,19 @@ export default {
 		},
 		
 		playPauseVideo(index) {
-			const video = this.$refs[`video-${index}`];
-			if (video && video[0]) {
-				if (video[0].paused) {
-					this.playVideo(index);
-				} else {
-					this.pauseVideo(index);
+			const currentItem = this.videos[index];
+			if (currentItem && currentItem.media_attachments[0].type === 'video') {
+				const video = this.$refs[`video-${index}`];
+				if (video && video[0]) {
+					if (video[0].paused) {
+						this.playVideo(index);
+					} else {
+						this.pauseVideo(index);
+					}
 				}
 			}
+			// For images, just set as current
+			this.currentVideoIndex = index;
 		},
 		
 		nextVideo() {
@@ -492,7 +555,7 @@ export default {
 	cursor: pointer;
 }
 
-.video-player {
+.video-player, .image-player {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
@@ -776,5 +839,46 @@ export default {
 		width: 95%;
 		max-height: 90vh;
 	}
+}
+
+/* Loading and Empty States */
+.loading-state, .empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+	text-align: center;
+	color: #666;
+}
+
+.loading-state .spinner {
+	width: 40px;
+	height: 40px;
+	border: 4px solid #f3f3f3;
+	border-top: 4px solid #007bff;
+	border-radius: 50%;
+	animation: spin 1s linear infinite;
+	margin-bottom: 20px;
+}
+
+@keyframes spin {
+	0% { transform: rotate(0deg); }
+	100% { transform: rotate(360deg); }
+}
+
+.empty-state i {
+	color: #ccc;
+	margin-bottom: 20px;
+}
+
+.empty-state h3 {
+	margin-bottom: 10px;
+	color: #333;
+}
+
+.empty-state p {
+	color: #666;
+	font-size: 14px;
 }
 </style>

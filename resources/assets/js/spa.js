@@ -99,6 +99,7 @@ Vue.component(
 );
 
 const HomeComponent = () => import(/* webpackChunkName: "home.chunk" */ "./../components/Home.vue");
+const ShortVideosComponent = () => import(/* webpackChunkName: "shortvideos.chunk" */ "./../components/ShortVideos.vue");
 const ComposeComponent = () => import(/* webpackChunkName: "compose.chunk" */ "./../components/Compose.vue");
 const PostComponent = () => import(/* webpackChunkName: "post.chunk" */ "./../components/Post.vue");
 const ProfileComponent = () => import(/* webpackChunkName: "profile.chunk" */ "./../components/Profile.vue");
@@ -148,15 +149,17 @@ const router = new VueRouter({
 
   routes: [
     {
+      path: "/i/web/timeline/local",
+      name: 'timeline-local',
+      component: ShortVideosComponent,
+      props: true
+    },
+    {
       path: "/i/web/timeline/:scope",
       name: 'timeline',
       component: HomeComponent,
       props: true
     },
-    // {
-    //  path: "/i/web/timeline/local",
-    //  component: LocalTimeline
-    // },
     // {
     //  path: "/i/web/timeline/global",
     //  component: GlobalTimeline
