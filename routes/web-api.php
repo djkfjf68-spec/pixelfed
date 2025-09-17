@@ -79,6 +79,7 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
                 Route::get('timelines/public', 'PublicApiController@publicTimelineApi');
                 Route::get('timelines/home', 'PublicApiController@homeTimelineApi');
                 Route::get('timelines/network', 'PublicApiController@networkTimelineApi');
+                Route::get('timelines/videos', 'VideosController@api');
                 Route::get('newsroom/timeline', 'NewsroomController@timelineApi');
                 Route::post('newsroom/markasread', 'NewsroomController@markAsRead');
                 Route::get('favourites', 'Api\BaseApiController@accountLikes');

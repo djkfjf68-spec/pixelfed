@@ -17,13 +17,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Pixelfed Version
+    | Bix Version
     |--------------------------------------------------------------------------
     |
-    | This value is the version of your Pixelfed instance.
+    | This value is the version of your Bix instance.
     |
     */
-    'version' => '0.12.6',
+    'version' => '1.0.0',
 
     /*
     |--------------------------------------------------------------------------

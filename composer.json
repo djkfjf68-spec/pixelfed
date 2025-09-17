@@ -1,7 +1,7 @@
 {
-    "name": "pixelfed/pixelfed",
-    "description": "Open and ethical photo sharing platform, powered by ActivityPub federation.",
-    "keywords": ["framework", "laravel", "pixelfed", "activitypub", "social", "network", "federation"],
+    "name": "bix/bix",
+    "description": "Modern social media platform with short videos and photo sharing, powered by ActivityPub federation.",
+    "keywords": ["framework", "laravel", "bix", "activitypub", "social", "network", "federation", "videos"],
     "license": "AGPL-3.0-only",
     "type": "project",
     "require": {

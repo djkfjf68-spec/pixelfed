@@ -1,11 +1,11 @@
 {
-  "name": "Pixelfed",
-  "short_name": "Pixelfed",
+  "name": "Bix",
+  "short_name": "Bix",
   "start_url": "/?source=pwa",
   "display": "standalone",
   "background_color": "#f5f8fa",
-  "description": "Federated Image Sharing",
-  "categories": ["social", "photo"],
+  "description": "Modern Social Media Platform with Short Videos",
+  "categories": ["social", "photo", "video"],
   "shortcuts": [
     {
       "name": "Notifications",
@@ -21,6 +21,11 @@
       "name": "Discover",
       "url": "/discover",
       "description": "Find new posts and profiles"
+    },
+    {
+      "name": "Videos",
+      "url": "/videos",
+      "description": "Watch short videos"
     },
     {
       "name": "Profile",

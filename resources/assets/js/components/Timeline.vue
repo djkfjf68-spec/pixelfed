@@ -954,6 +954,11 @@
 						break;
 
 						case 'local':
+						// Redirect to short videos instead of local timeline
+						this.$router.push('/i/videos');
+						return;
+
+						case 'videos':
 						apiUrl = '/api/pixelfed/v1/timelines/public';
 						break;
 

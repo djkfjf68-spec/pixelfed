@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand navbar-light navbar-laravel shadow-none border-bottom sticky-top py-1">
 	<div class="container">
 			<a class="navbar-brand d-flex align-items-center" href="{{ config('app.url') }}" title="Logo">
-				<img src="/img/pixelfed-icon-color.svg" height="30px" class="px-2" loading="eager" alt="Pixelfed logo">
+				<img src="/img/bix-icon-color.svg" height="30px" class="px-2" loading="eager" alt="Bix logo">
 				<span class="font-weight-bold mb-0 d-none d-sm-block" style="font-size:20px;">{{ config_cache('app.name') }}</span>
 			</a>
 
@@ -38,6 +38,12 @@
 								<span class="sr-only">Home</span>
 							</a>
 						</li>
+							<li class="nav-item px-md-2 d-none d-md-block">
+								<a class="nav-link font-weight-bold text-dark" href="/videos" title="Videos" data-toggle="tooltip" data-placement="bottom">
+									<i class="fal fa-play fa-lg" style="font-size: 22px;"></i>
+									<span class="sr-only">Videos</span>
+								</a>
+							</li>
 						<li class="nav-item px-md-2">
 							<a class="nav-link font-weight-bold text-dark" href="/account/direct" title="Direct" data-toggle="tooltip" data-placement="bottom">
 								<i class="fal fa-location-circle fa-lg" style="font-size: 22px;"></i>

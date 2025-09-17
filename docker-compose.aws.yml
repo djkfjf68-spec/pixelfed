@@ -1,0 +1,175 @@
+---
+###############################################################
+# AWS-Centralized Docker Compose Configuration for Bix
+# This configuration removes local database and Redis services
+# and relies entirely on AWS services (RDS, ElastiCache, S3)
+###############################################################
+
+services:
+  # HTTP/HTTPS proxy
+  proxy:
+    image: "nginxproxy/nginx-proxy:${DOCKER_PROXY_VERSION}"
+    container_name: "${DOCKER_ALL_CONTAINER_NAME_PREFIX}-proxy"
+    restart: unless-stopped
+    profiles:
+      - ${DOCKER_PROXY_PROFILE:-}
+    environment:
+      DOCKER_SERVICE_NAME: "proxy"
+    volumes:
+      - "${DOCKER_PROXY_HOST_DOCKER_SOCKET_PATH}:/tmp/docker.sock:ro"
+      - "${DOCKER_ALL_HOST_CONFIG_ROOT_PATH}/proxy/conf.d:/etc/nginx/conf.d"
+      - "${DOCKER_ALL_HOST_CONFIG_ROOT_PATH}/proxy/vhost.d:/etc/nginx/vhost.d"
+      - "${DOCKER_ALL_HOST_CONFIG_ROOT_PATH}/proxy/certs:/etc/nginx/certs"
+      - "${DOCKER_ALL_HOST_DATA_ROOT_PATH}/proxy/html:/usr/share/nginx/html"
+    ports:
+      - "${DOCKER_PROXY_HOST_PORT_HTTP}:80"
+      - "${DOCKER_PROXY_HOST_PORT_HTTPS}:443"
+    healthcheck:
+      test: "curl --fail https://${APP_DOMAIN}/api/service/health-check"
+      interval: "${DOCKER_PROXY_HEALTHCHECK_INTERVAL}"
+      retries: 2
+      timeout: 5s
+
+  # Proxy companion for managing letsencrypt SSL certificates
+  proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: "${DOCKER_ALL_CONTAINER_NAME_PREFIX}-proxy-acme"
+    restart: unless-stopped
+    profiles:
+      - ${DOCKER_PROXY_ACME_PROFILE:-}
+    environment:
+      DOCKER_SERVICE_NAME: "proxy-acme"
+      DEFAULT_EMAIL: "${DOCKER_PROXY_LETSENCRYPT_EMAIL:?error}"
+    volumes:
+      - "${DOCKER_PROXY_HOST_DOCKER_SOCKET_PATH}:/var/run/docker.sock:ro"
+      - "${DOCKER_ALL_HOST_CONFIG_ROOT_PATH}/proxy/conf.d:/etc/nginx/conf.d"
+      - "${DOCKER_ALL_HOST_CONFIG_ROOT_PATH}/proxy/vhost.d:/etc/nginx/vhost.d"
+      - "${DOCKER_ALL_HOST_CONFIG_ROOT_PATH}/proxy/certs:/etc/nginx/certs"
+      - "${DOCKER_ALL_HOST_DATA_ROOT_PATH}/proxy/html:/usr/share/nginx/html"
+      - "${DOCKER_ALL_HOST_DATA_ROOT_PATH}/proxy/acme:/etc/acme.sh"
+    depends_on:
+      - proxy
+
+  # Main Bix web application
+  web:
+    image: "${DOCKER_APP_IMAGE}:${DOCKER_APP_TAG}"
+    container_name: "${DOCKER_ALL_CONTAINER_NAME_PREFIX}-web"
+    restart: unless-stopped
+    profiles:
+      - ${DOCKER_WEB_PROFILE:-}
+    build:
+      target: ${DOCKER_APP_RUNTIME}-runtime
+      cache_from:
+        - "type=registry,ref=${DOCKER_APP_IMAGE}-cache:${DOCKER_APP_TAG}"
+      args:
+        APT_PACKAGES_EXTRA: "${DOCKER_APP_APT_PACKAGES_EXTRA:-}"
+        BUILD_FRONTEND: "${DOCKER_APP_BUILD_FRONTEND:-1}"
+        PHP_BASE_TYPE: "${DOCKER_APP_BASE_TYPE}"
+        PHP_DEBIAN_RELEASE: "${DOCKER_APP_DEBIAN_RELEASE}"
+        PHP_EXTENSIONS_EXTRA: "${DOCKER_APP_PHP_EXTENSIONS_EXTRA:-}"
+        PHP_PECL_EXTENSIONS_EXTRA: "${DOCKER_APP_PHP_PECL_EXTENSIONS_EXTRA:-}"
+        PHP_VERSION: "${DOCKER_APP_PHP_VERSION:?error}"
+    environment:
+      # Used by Bix Docker init script
+      DOCKER_SERVICE_NAME: "web"
+      DOCKER_APP_ENTRYPOINT_DEBUG: ${DOCKER_APP_ENTRYPOINT_DEBUG:-0}
+      ENTRYPOINT_SKIP_SCRIPTS: ${ENTRYPOINT_SKIP_SCRIPTS:-}
+      # Nginx Proxy
+      VIRTUAL_HOST: "${APP_DOMAIN}"
+      VIRTUAL_PORT: 80
+      LETSENCRYPT_HOST: "${APP_DOMAIN}"
+      LETSENCRYPT_EMAIL: "${DOCKER_PROXY_LETSENCRYPT_EMAIL:?error}"
+      # AWS Configuration
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID:?error}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY:?error}"
+      AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION:?error}"
+      AWS_BUCKET: "${AWS_BUCKET:?error}"
+      # Database (AWS RDS)
+      DB_CONNECTION: "${DB_CONNECTION:?error}"
+      DB_HOST: "${DB_HOST:?error}"
+      DB_PORT: "${DB_PORT:?error}"
+      DB_DATABASE: "${DB_DATABASE:?error}"
+      DB_USERNAME: "${DB_USERNAME:?error}"
+      DB_PASSWORD: "${DB_PASSWORD:?error}"
+      # Redis (AWS ElastiCache)
+      REDIS_HOST: "${REDIS_HOST:?error}"
+      REDIS_PORT: "${REDIS_PORT:?error}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD:-}"
+    volumes:
+      - "./.env:/var/www/.env"
+      - "${DOCKER_ALL_HOST_CONFIG_ROOT_PATH}/proxy/conf.d:/shared/proxy/conf.d"
+      - "${DOCKER_APP_HOST_CACHE_PATH}:/var/www/bootstrap/cache"
+      - "${DOCKER_APP_HOST_OVERRIDES_PATH}:/docker/overrides:ro"
+      - "${DOCKER_APP_HOST_STORAGE_PATH}:/var/www/storage"
+    labels:
+      com.github.nginx-proxy.nginx-proxy.keepalive: 30
+      com.github.nginx-proxy.nginx-proxy.http2.enable: true
+      com.github.nginx-proxy.nginx-proxy.http3.enable: true
+    ports:
+      - "${DOCKER_WEB_PORT_EXTERNAL_HTTP}:80"
+    healthcheck:
+      test: 'curl --header "Host: ${APP_DOMAIN}" --fail http://localhost/api/service/health-check'
+      interval: "${DOCKER_WEB_HEALTHCHECK_INTERVAL}"
+      retries: 2
+      timeout: 5s
+
+  # Background worker for processing jobs
+  worker:
+    image: "${DOCKER_APP_IMAGE}:${DOCKER_APP_TAG}"
+    container_name: "${DOCKER_ALL_CONTAINER_NAME_PREFIX}-worker"
+    command: gosu www-data php artisan horizon
+    restart: unless-stopped
+    stop_signal: SIGTERM
+    profiles:
+      - ${DOCKER_WORKER_PROFILE:-}
+    build:
+      target: ${DOCKER_APP_RUNTIME}-runtime
+      cache_from:
+        - "type=registry,ref=${DOCKER_APP_IMAGE}-cache:${DOCKER_APP_TAG}"
+      args:
+        APT_PACKAGES_EXTRA: "${DOCKER_APP_APT_PACKAGES_EXTRA:-}"
+        BUILD_FRONTEND: "${DOCKER_APP_BUILD_FRONTEND:-0}"
+        PHP_BASE_TYPE: "${DOCKER_APP_BASE_TYPE}"
+        PHP_DEBIAN_RELEASE: "${DOCKER_APP_DEBIAN_RELEASE}"
+        PHP_EXTENSIONS_EXTRA: "${DOCKER_APP_PHP_EXTENSIONS_EXTRA:-}"
+        PHP_PECL_EXTENSIONS_EXTRA: "${DOCKER_APP_PHP_PECL_EXTENSIONS_EXTRA:-}"
+        PHP_VERSION: "${DOCKER_APP_PHP_VERSION:?error}"
+    environment:
+      # Used by Bix Docker init script
+      DOCKER_SERVICE_NAME: "worker"
+      DOCKER_APP_ENTRYPOINT_DEBUG: ${DOCKER_APP_ENTRYPOINT_DEBUG:-0}
+      ENTRYPOINT_SKIP_SCRIPTS: ${ENTRYPOINT_SKIP_SCRIPTS:-}
+      # AWS Configuration
+      AWS_ACCESS_KEY_ID: "${AWS_ACCESS_KEY_ID:?error}"
+      AWS_SECRET_ACCESS_KEY: "${AWS_SECRET_ACCESS_KEY:?error}"
+      AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION:?error}"
+      AWS_BUCKET: "${AWS_BUCKET:?error}"
+      # Database (AWS RDS)
+      DB_CONNECTION: "${DB_CONNECTION:?error}"
+      DB_HOST: "${DB_HOST:?error}"
+      DB_PORT: "${DB_PORT:?error}"
+      DB_DATABASE: "${DB_DATABASE:?error}"
+      DB_USERNAME: "${DB_USERNAME:?error}"
+      DB_PASSWORD: "${DB_PASSWORD:?error}"
+      # Redis (AWS ElastiCache)
+      REDIS_HOST: "${REDIS_HOST:?error}"
+      REDIS_PORT: "${REDIS_PORT:?error}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD:-}"
+    volumes:
+      - "./.env:/var/www/.env"
+      - "${DOCKER_ALL_HOST_CONFIG_ROOT_PATH}/proxy/conf.d:/shared/proxy/conf.d"
+      - "${DOCKER_APP_HOST_CACHE_PATH}:/var/www/bootstrap/cache"
+      - "${DOCKER_APP_HOST_OVERRIDES_PATH}:/docker/overrides:ro"
+      - "${DOCKER_APP_HOST_STORAGE_PATH}:/var/www/storage"
+    healthcheck:
+      test: gosu www-data php artisan horizon:status | grep running
+      interval: "${DOCKER_WORKER_HEALTHCHECK_INTERVAL:?error}"
+      timeout: 5s
+      retries: 2
+
+  # NOTE: Local database and Redis services have been removed
+  # This configuration assumes you are using:
+  # - AWS RDS for database
+  # - AWS ElastiCache for Redis
+  # - AWS S3 for file storage
+  # - AWS SES for email (optional)

@@ -8,19 +8,19 @@
 
 	<meta name="mobile-web-app-capable" content="yes">
 
-	<title>{{ config_cache('app.name', 'Pixelfed') }}</title>
+	<title>{{ config_cache('app.name', 'Bix') }}</title>
 
 	<link rel="canonical" href="{{ request()->url() }}" />
 
-	<meta property="og:site_name" content="{{ config_cache('app.name', 'pixelfed') }}" />
-	<meta property="og:title" content="{{ config_cache('app.name', 'pixelfed') }}" />
+	<meta property="og:site_name" content="{{ config_cache('app.name', 'Bix') }}" />
+	<meta property="og:title" content="{{ config_cache('app.name', 'Bix') }}" />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="{{request()->url()}}" />
 	<meta property="og:image" content="{{ config_cache('app.banner_image') ?? url('storage/headers/default.jpg')}}" />
-	<meta property="og:description" content="{{ config_cache('app.short_description') ?? 'Decentralized photo sharing social media powered by Pixelfed' }}" />
-	<meta name="description" content="{{ config_cache('app.short_description') ?? 'Decentralized photo sharing social media powered by Pixelfed' }}" />
-	<meta name="twitter:title" content="{{ config_cache('app.name', 'pixelfed') }}" />
-    <meta name="twitter:description" content="{{ config_cache('app.short_description') ?? 'Decentralized photo sharing social media powered by Pixelfed' }}" />
+	<meta property="og:description" content="{{ config_cache('app.short_description') ?? 'Modern social media platform with short videos and photo sharing powered by Bix' }}" />
+	<meta name="description" content="{{ config_cache('app.short_description') ?? 'Modern social media platform with short videos and photo sharing powered by Bix' }}" />
+	<meta name="twitter:title" content="{{ config_cache('app.name', 'Bix') }}" />
+    <meta name="twitter:description" content="{{ config_cache('app.short_description') ?? 'Modern social media platform with short videos and photo sharing powered by Bix' }}" />
     <meta name="twitter:image" content="{{ config_cache('app.banner_image') ?? url('storage/headers/default.jpg')}}" />
     <meta name="twitter:card" content="summary_large_image" />
 

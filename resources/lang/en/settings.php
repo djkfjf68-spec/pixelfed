@@ -90,7 +90,7 @@ return [
     'privacy.when_your_account_is_visible_to_search_engines_etc' =>     'When your account is visible to search engines, your information can be crawled and stored by search engines.',
     'privacy.not_available_when_your_account_is_private' =>             'Not available when your account is private',
     'privacy.include_public_posts_in_search_results' =>                 'Include public posts in search results',
-    'privacy.your_public_posts_may_appear_in_search_results_etc' =>     'Your public posts may appear in search results on Pixelfed and Mastodon. People who have interacted with your posts may be able to search them regardless.',
+    'privacy.your_public_posts_may_appear_in_search_results_etc' =>     'Your public posts may appear in search results on Bix and Mastodon. People who have interacted with your posts may be able to search them regardless.',
     'privacy.show_on_directory' =>                                      'Show on Directory',
     'privacy.when_this_option_is_enabled_your_profile_is_etc' =>        'When this option is enabled, your profile is included in the Directory. Only public profiles are eligible.',
     'privacy.receive_direct_messages_from_anyone' =>                    'Receive Direct Messages from anyone',

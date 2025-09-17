@@ -427,8 +427,12 @@ Route::domain(config('pixelfed.domain.app'))->middleware(['validemail', 'twofact
 
     Route::group(['prefix' => 'timeline'], function () {
         Route::redirect('/', '/');
-        Route::get('public', 'TimelineController@local')->name('timeline.public');
+        Route::get('public', 'VideosController@index')->name('timeline.public'); // Redirect to videos
         Route::get('network', 'TimelineController@network')->name('timeline.network');
+    });
+
+    Route::group(['prefix' => 'videos'], function () {
+        Route::get('/', 'VideosController@index')->name('videos.index');
     });
 
     Route::group(['prefix' => 'users'], function () {

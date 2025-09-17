@@ -1,16 +1,13 @@
 <p align="center">
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://pixelfed.nyc3.cdn.digitaloceanspaces.com/logos/pixelfed-full-color-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://pixelfed.nyc3.cdn.digitaloceanspaces.com/logos/pixelfed-full-color.svg">
-  <img alt="Pixelfed logo" src="https://pixelfed.nyc3.cdn.digitaloceanspaces.com/logos/pixelfed-full-color.svg">
-</picture>
+<h1 style="font-size: 3em; color: #007bff; font-weight: bold;">Bix</h1>
+<p style="font-size: 1.2em; color: #666;">Modern Social Media Platform</p>
 </p>
 
 <p align="center">
-<a href="https://packagist.org/packages/pixelfed/pixelfed"><img src="https://poser.pugx.org/pixelfed/pixelfed/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/pixelfed/pixelfed"><img src="https://poser.pugx.org/pixelfed/pixelfed/license.svg" alt="License"></a>
-<a title="Crowdin" target="_blank" href="https://crowdin.com/project/pixelfed"><img src="https://badges.crowdin.net/pixelfed/localized.svg"></a>
-<a href="https://fedidb.org/software/pixelfed"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fapi.fedidb.org%2Fv1%2Fsoftware%2Fpixelfed&query=%24.user_count&logo=pixelfed&logoColor=white&label=Total%20Users" alt="Total Pixelfed users from FediDB" /></a>
+<a href="https://packagist.org/packages/bix/bix"><img src="https://poser.pugx.org/bix/bix/v/stable.svg" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/bix/bix"><img src="https://poser.pugx.org/bix/bix/license.svg" alt="License"></a>
+<img src="https://img.shields.io/badge/AWS-Powered-orange" alt="AWS Powered" />
+<img src="https://img.shields.io/badge/Videos-Supported-green" alt="Video Support" />
 </p>
 
 <p align="center">
@@ -21,7 +18,16 @@
 
 ## Introduction
 
-Photo sharing the way it should be. Pixelfed lets your casual shots and creative photography find their audience naturally, without algorithmic barriers. Join [millions](https://fedidb.com) of people sharing across the [fediverse](https://fediverse.info).
+**Bix** is a modern social media platform that combines the best of photo sharing with engaging short-form video content. Built on AWS infrastructure for scalability and reliability, Bix offers a seamless experience for creators and viewers alike.
+
+### Key Features
+
+- 📱 **Short Videos**: Vertical video feed with smooth scrolling
+- 📸 **Photo Sharing**: High-quality image sharing and discovery
+- ☁️ **AWS Powered**: Fully cloud-native architecture
+- 🔄 **ActivityPub**: Federated social networking
+- 🎨 **Modern UI**: Clean, intuitive interface
+- 📊 **Real-time Interactions**: Likes, comments, and shares
 
 <p align="center">
 <picture>

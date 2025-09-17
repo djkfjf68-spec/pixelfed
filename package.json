@@ -1,5 +1,5 @@
 {
-    "name": "pixelfed",
+    "name": "bix",
     "private": true,
     "scripts": {
         "development": "mix",
